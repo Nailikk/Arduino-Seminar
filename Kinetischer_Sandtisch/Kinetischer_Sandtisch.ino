@@ -11,13 +11,13 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 
 uint32_t delayMS;
 
-const int limitSwitchXPin = 7;  // X-Achse Limit Switch
-const int limitSwitchYPin = 8;  // Y-Achse Limit Switch
+const int limitSwitchYPin = 7;  // X-Achse Limit Switch
+const int limitSwitchXPin = 8;  // Y-Achse Limit Switch
 
-const int motorXDirPin = 2;  // X-Achse Richtung
-const int motorXStepPin = 3; // X-Achse Schritt
-const int motorYDirPin = 4;  // Y-Achse Richtung
-const int motorYStepPin = 5; // Y-Achse Schritt
+const int motorLDirPin = 2;  // X-Achse Richtung
+const int motorLStepPin = 3; // X-Achse Schritt
+const int motorRDirPin = 4;  // Y-Achse Richtung
+const int motorRStepPin = 5; // Y-Achse Schritt
 
 const int motorDelay = 1000;  // Geschwindigkeit Motor (höherer = langsamer)
 
@@ -33,17 +33,17 @@ void setup() {
 
   dht.humidity().getSensor(&sensor); //Luftfeuchtichkeit
 
-  delayMS = sensor.min_delay / 500; //Setzt abfrage auf 2sek (100 = 10sek, 1000 = 1sek)
+  delayMS = sensor.min_delay / 200; //Setzt abfrage auf 2sek (100 = 10sek, 1000 = 1sek)
 
 
   //Pins initialisieren
-  pinMode(limitSwitchXPin, INPUT_PULLUP);
   pinMode(limitSwitchYPin, INPUT_PULLUP);
+  pinMode(limitSwitchXPin, INPUT_PULLUP);
   
-  pinMode(motorXDirPin, OUTPUT);
-  pinMode(motorXStepPin, OUTPUT);
-  pinMode(motorYDirPin, OUTPUT);
-  pinMode(motorYStepPin, OUTPUT);
+  pinMode(motorLDirPin, OUTPUT);
+  pinMode(motorLStepPin, OUTPUT);
+  pinMode(motorRDirPin, OUTPUT);
+  pinMode(motorRStepPin, OUTPUT);
 
 
   autoHome();
@@ -51,11 +51,68 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  
 
+  delay(delayMS);
+  sensors_event_t event;
+
+  //Abrufen der Temperatur und ausgabe.
+  dht.temperature().getEvent(&event);
+    Serial.print(event.temperature);
+    Serial.println(F("C°"));
+  
+  //Abrufen der Feuchtigkeits und ausgabe.
+  dht.humidity().getEvent(&event);
+    Serial.print(event.relative_humidity);
+    Serial.println(F("%"));
+  
 }
 
 void autoHome(){
 
+  Serial.println("Starten von Auto-Home");
+
+  //Richtung setzen Y-Achse
+  digitalWrite(motorLDirPin, HIGH); 
+  digitalWrite(motorRDirPin, LOW);
+
+  //Homing Y-Achse
+  Serial.println("Starten Y-Achse Home");
+  while (digitalRead(limitSwitchYPin) == HIGH) {  // Läuft bis der Switch erreicht ist
+    //
+    digitalWrite(motorLStepPin, HIGH);
+    delayMicroseconds(motorDelay);
+    digitalWrite(motorRStepPin, HIGH);
+    delayMicroseconds(motorDelay);
+    //
+    digitalWrite(motorLStepPin, LOW);
+    delayMicroseconds(motorDelay);
+    digitalWrite(motorRStepPin, LOW);
+    delayMicroseconds(motorDelay);
+  }
+  Serial.println("Y-Achse Fertig!");
+
+  //Homing X-Achse 
+  Serial.println("Starten X-Achse Home");
+
+  //Richtung setzen X-Achse
+  digitalWrite(motorLDirPin, HIGH); 
+  digitalWrite(motorRDirPin, HIGH);
+
+  while (digitalRead(limitSwitchXPin) == HIGH) {  // Läuft bis der Switch erreicht ist
+    //
+    digitalWrite(motorLStepPin, HIGH);
+    delayMicroseconds(motorDelay);
+    digitalWrite(motorRStepPin, HIGH);
+    delayMicroseconds(motorDelay);
+    //
+    digitalWrite(motorLStepPin, LOW);
+    delayMicroseconds(motorDelay);
+    digitalWrite(motorRStepPin, LOW);
+    delayMicroseconds(motorDelay);
+  }
+  Serial.println("X-Achse Fertig!");
+
+  Serial.println("Auto-Home Fertig!");
 
 }
