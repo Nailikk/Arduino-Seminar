@@ -48,6 +48,8 @@ void setup() {
 
   autoHome();
 
+  clearboard();
+
 }
 
 void loop() {
@@ -115,4 +117,8 @@ void autoHome(){
 
   Serial.println("Auto-Home Fertig!");
 
+}
+
+void clearboard(){
+  
 }
