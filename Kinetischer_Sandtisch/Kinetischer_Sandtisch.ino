@@ -53,6 +53,7 @@ void setup() {
 
   Clearboard();
 
+  //Clearboard45();
 }
 
 void loop() {
@@ -133,10 +134,12 @@ void autoHome(){
 
 }
 
+
 void moveY(int steps, bool direction, int motorDelayFast) {
   digitalWrite(motorLDirPin, direction);  //Richtung setzen
   digitalWrite(motorRDirPin, !direction); //Andere Achse in Gegenrichtung
-  for (int i = 0; i < steps; i++) {
+  int stepsfory = steps / 2;
+  for (int i = 0; i < stepsfory; i++) {
     digitalWrite(motorLStepPin, HIGH);
     digitalWrite(motorRStepPin, HIGH);
     delayMicroseconds(motorDelayFast);
@@ -159,6 +162,42 @@ void moveX(int steps, bool direction, int motorDelayFast) {
   }
 }
 
+// Funktion, um gleichzeitig in X- und Y-Richtung zu fahren
+void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFast) {
+  
+  //digitalWrite(motorLDirPin, xDirection);  // Richtung für X-Achse setzen
+  //digitalWrite(motorRDirPin, yDirection);  // Richtung für Y-Achse setzen
+
+  //int maxSteps = max(xSteps, ySteps);  // Maximaler Schrittwert für die Synchronisierung
+
+  for (int i = 0; i < Steps; i++) {
+    //1 step in x rechts
+    digitalWrite(motorLDirPin, xDirection);  
+    digitalWrite(motorRDirPin, xDirection);
+
+    digitalWrite(motorLStepPin, HIGH);
+    digitalWrite(motorRStepPin, HIGH);
+    delayMicroseconds(motorDelayFast);
+    digitalWrite(motorLStepPin, LOW);
+    digitalWrite(motorRStepPin, LOW);
+    delayMicroseconds(motorDelayFast);
+
+    //1 step in y oben
+    digitalWrite(motorLDirPin, yDirection);  //oben LOW, unten HIGH
+    digitalWrite(motorRDirPin, yDirection);
+
+    digitalWrite(motorLStepPin, HIGH);
+    digitalWrite(motorRStepPin, LOW);
+    delayMicroseconds(motorDelayFast);
+    digitalWrite(motorLStepPin, LOW);
+    digitalWrite(motorRStepPin, LOW);
+    delayMicroseconds(motorDelayFast);
+
+
+  }
+}
+
+
 void Clearboard(){
   int stepsPerCm = 421;  //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
   int stepsLong = 40 * stepsPerCm;  //Schritte für 40 cm
@@ -166,7 +205,7 @@ void Clearboard(){
   
   Serial.println("Starten von Clearboard");
  
-  for (int i = 0; i < 2; i++) { //40 cm / 2 = 20 
+  for (int i = 0; i < 20; i++) { //40 cm / 2 = 20 
 
     //40 cm nach oben fahren
     Serial.println("40 cm nach oben");
@@ -189,4 +228,46 @@ void Clearboard(){
   Serial.println("40 cm zurück nach rechts");
   moveX(stepsLong, HIGH, 400);  //Richtung nach rechts
   Serial.println("Clearboard Fertig!");
+}
+
+void Clearboard45(){
+  int stepsPerCm = 421;  //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
+  int stepsLong = 40 * stepsPerCm;  //Schritte für 40 cm
+  int step1Cm = stepsPerCm;         //Schritte für 1 cm
+  int count = 0;
+
+  for (int i = 0; i < 20; i++){
+    Serial.println("Starten von Clearboard 45°");
+
+    Serial.println("1 cm nach links Nr." + String(i + 1));
+    moveX(step1Cm, LOW, 800);    //Richtung nach links
+    count++;
+
+    Serial.print("Bewege diagonal nach rechts oben");
+    moveDiagonal(step1Cm * count, HIGH, LOW, 800);  //X nach rechts, Y nach oben
+
+    Serial.println("1 cm nach links Nr." + String(i + 1));
+    moveY(step1Cm, LOW, 800);    //Richtung nach oben
+    count++;
+
+    Serial.print("Bewege diagonal nach links unten");
+    moveDiagonal(step1Cm * count, LOW, HIGH, 800);  //X nach links, Y nach unten
+  }
+
+
+  for (int i = 0; i < 20; i++){
+    Serial.println("1 cm nach links Nr." + String(i + 1));
+    moveY(step1Cm, LOW, 800);    //Richtung nach oben
+    count--;
+    
+    Serial.print("Bewege diagonal nach rechts oben");
+    moveDiagonal(step1Cm * count, HIGH, LOW, 800);  //X nach rechts, Y nach oben
+
+    Serial.println("1 cm nach links Nr." + String(i + 1));
+    moveX(step1Cm, LOW, 800);    //Richtung nach links
+    count--;
+
+    Serial.print("Bewege diagonal nach links unten");
+    moveDiagonal(step1Cm * count, LOW, HIGH, 800);  //X nach rechts, Y nach oben
+  }
 }
