@@ -49,13 +49,13 @@ void setup() {
   pinMode(motorRStepPin, OUTPUT);
 
 
-  //autoHome();
+  autoHome();
 
-  //Clearboard();
+  Clearboard();
 
-  //Clearboard45();
+  Clearboard45();
 
-  moveLinear(421 * -20, 421 * -40, motorDelayFast);
+  moveLinear(421 * -20, 421 * -40, motorDelayFast); //Links LOW, Rechts HIGH,    oben LOW, unten HIGH
 }
 
 void loop() {
@@ -165,7 +165,6 @@ void moveX(int steps, bool direction, int motorDelayFast) {
 
 void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFast) {
   // Funktion, um gleichmäßig gleichzeitig in X- und Y-Richtung zu fahren
-  //int maxSteps = max(xSteps, ySteps);  // Maximaler Schrittwert für die Synchronisierung
 
   for (int i = 0; i < Steps; i++) {
     //1 step in x 
@@ -189,8 +188,6 @@ void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFas
     digitalWrite(motorLStepPin, LOW);
     digitalWrite(motorRStepPin, LOW);
     delayMicroseconds(motorDelayFast);
-
-
   }
 }
 
@@ -268,6 +265,7 @@ void Clearboard45(){
 }
 
 void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
+  //für Linieare Bewegungen auf 2-Achsen
 
   bool dirX;
   bool dirY;
@@ -279,7 +277,7 @@ void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
 
   } else if (Xdifference < 0) {
     Serial.println("Nach Links");
-    dirX = LOW;
+    dirX = LOW;   //Links LOW, Rechts HIGH
   }
 
   if (Ydifference > 0) {
@@ -288,15 +286,11 @@ void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
 
   } else if (Ydifference < 0) {
     Serial.println("Nach Unten");
-    dirY = HIGH;
+    dirY = HIGH;  //oben LOW, unten HIGH
   }
 
   //Maximale Anzahl Schritten (längere Achse)
   int steps = max(abs(Xdifference), abs(Ydifference));
-  
-  //Berechne Schritte pro Schleife
-  //float xStep = (float)abs(Xdifference) / steps;
-  //float yStep = (float)abs(Ydifference) / steps;
 
   int x = 0;
   int y = 0;
@@ -305,17 +299,17 @@ void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
   int xStep = Xdifference > 0 ? 1 : -1;  //Schrittgröße für X
   int yStep = Ydifference > 0 ? 1 : -1;  //Schrittgröße für Y
 
-  // Loop über die Gesamtzahl der Schritte
+  //Loop für die Gesamtzahl Schritte
   for (int i = 0; i < steps; i++) {
-    if (2 * (error + Ydifference) < Xdifference) {  //Wenn der Fehler kleiner ist, bewege X
+    if (2 * (error + Ydifference) < Xdifference) {  //Wenn Fehler kleiner ist, bewege X
       x += xStep;
-      moveX(1, dirX, motorDelayFast);  //Bewege den X-Motor um 1 Schritt
-      error += Ydifference;  //Aktualisiere den Fehlerwert
+      moveX(1, dirX, motorDelayFast);  //Bewege X-Motor 1 Schritt
+      error += Ydifference;  //Aktualisiere Fehlerwert
     }
-    if (2 * (error + Xdifference) >= Ydifference) {  //Wenn der Fehler größer ist, bewege Y
+    if (2 * (error + Xdifference) >= Ydifference) {  //Wenn Fehler größer ist, bewege Y
       y += yStep;
-      moveY(1, dirY, motorDelayFast);  //Bewege den Y-Motor um 1 Schritt
-      error -= Xdifference;  //Aktualisiere den Fehlerwert
+      moveY(1, dirY, motorDelayFast);  //Bewege Y-Motor 1 Schritt
+      error -= Xdifference;  //Aktualisiere Fehlerwert
     }        
   }
 }
