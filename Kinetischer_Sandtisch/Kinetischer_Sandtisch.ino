@@ -49,11 +49,13 @@ void setup() {
   pinMode(motorRStepPin, OUTPUT);
 
 
-  autoHome();
+  //autoHome();
 
-  Clearboard();
+  //Clearboard();
 
   //Clearboard45();
+
+  moveLinear(421 * -20, 421 * -40, motorDelayFast);
 }
 
 void loop() {
@@ -134,11 +136,10 @@ void autoHome(){
 
 }
 
-
 void moveY(int steps, bool direction, int motorDelayFast) {
   digitalWrite(motorLDirPin, direction);  //Richtung setzen
   digitalWrite(motorRDirPin, !direction); //Andere Achse in Gegenrichtung
-  int stepsfory = steps / 2;
+  int stepsfory = abs(steps) / 2;
   for (int i = 0; i < stepsfory; i++) {
     digitalWrite(motorLStepPin, HIGH);
     digitalWrite(motorRStepPin, HIGH);
@@ -152,7 +153,7 @@ void moveY(int steps, bool direction, int motorDelayFast) {
 void moveX(int steps, bool direction, int motorDelayFast) {
   digitalWrite(motorLDirPin, direction);  //Richtung setzen
   digitalWrite(motorRDirPin, direction);  //Beide Motoren in dieselbe Richtung
-  for (int i = 0; i < steps; i++) {
+  for (int i = 0; i < abs(steps); i++) {
     digitalWrite(motorLStepPin, HIGH);
     digitalWrite(motorRStepPin, HIGH);
     delayMicroseconds(motorDelayFast);
@@ -162,17 +163,13 @@ void moveX(int steps, bool direction, int motorDelayFast) {
   }
 }
 
-// Funktion, um gleichzeitig in X- und Y-Richtung zu fahren
 void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFast) {
-  
-  //digitalWrite(motorLDirPin, xDirection);  // Richtung für X-Achse setzen
-  //digitalWrite(motorRDirPin, yDirection);  // Richtung für Y-Achse setzen
-
+  // Funktion, um gleichmäßig gleichzeitig in X- und Y-Richtung zu fahren
   //int maxSteps = max(xSteps, ySteps);  // Maximaler Schrittwert für die Synchronisierung
 
   for (int i = 0; i < Steps; i++) {
-    //1 step in x rechts
-    digitalWrite(motorLDirPin, xDirection);  
+    //1 step in x 
+    digitalWrite(motorLDirPin, xDirection);  //Links LOW, Rechts HIGH
     digitalWrite(motorRDirPin, xDirection);
 
     digitalWrite(motorLStepPin, HIGH);
@@ -182,12 +179,12 @@ void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFas
     digitalWrite(motorRStepPin, LOW);
     delayMicroseconds(motorDelayFast);
 
-    //1 step in y oben
+    //1 step in y 
     digitalWrite(motorLDirPin, yDirection);  //oben LOW, unten HIGH
     digitalWrite(motorRDirPin, yDirection);
 
     digitalWrite(motorLStepPin, HIGH);
-    digitalWrite(motorRStepPin, LOW);
+    digitalWrite(motorRStepPin, LOW); //!!!
     delayMicroseconds(motorDelayFast);
     digitalWrite(motorLStepPin, LOW);
     digitalWrite(motorRStepPin, LOW);
@@ -196,7 +193,6 @@ void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFas
 
   }
 }
-
 
 void Clearboard(){
   int stepsPerCm = 421;  //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
@@ -246,7 +242,7 @@ void Clearboard45(){
     Serial.print("Bewege diagonal nach rechts oben");
     moveDiagonal(step1Cm * count, HIGH, LOW, 800);  //X nach rechts, Y nach oben
 
-    Serial.println("1 cm nach links Nr." + String(i + 1));
+    Serial.println("1 cm nach oben Nr." + String(i + 1));
     moveY(step1Cm, LOW, 800);    //Richtung nach oben
     count++;
 
@@ -254,9 +250,8 @@ void Clearboard45(){
     moveDiagonal(step1Cm * count, LOW, HIGH, 800);  //X nach links, Y nach unten
   }
 
-
   for (int i = 0; i < 20; i++){
-    Serial.println("1 cm nach links Nr." + String(i + 1));
+    Serial.println("1 cm nach oben Nr." + String(i + 1));
     moveY(step1Cm, LOW, 800);    //Richtung nach oben
     count--;
     
@@ -268,6 +263,62 @@ void Clearboard45(){
     count--;
 
     Serial.print("Bewege diagonal nach links unten");
-    moveDiagonal(step1Cm * count, LOW, HIGH, 800);  //X nach rechts, Y nach oben
+    moveDiagonal(step1Cm * count, LOW, HIGH, 800);  //X nach links, Y nach unten
   }
 }
+
+void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
+
+  bool dirX;
+  bool dirY;
+
+  //Richtung für die move x & y funktionen geben
+  if (Xdifference > 0) {
+    Serial.println("Nach Rechts");
+    dirX = HIGH;  //Links LOW, Rechts HIGH
+
+  } else if (Xdifference < 0) {
+    Serial.println("Nach Links");
+    dirX = LOW;
+  }
+
+  if (Ydifference > 0) {
+    Serial.println("Nach Oben");
+    dirY = LOW;  //oben LOW, unten HIGH
+
+  } else if (Ydifference < 0) {
+    Serial.println("Nach Unten");
+    dirY = HIGH;
+  }
+
+  //Maximale Anzahl Schritten (längere Achse)
+  int steps = max(abs(Xdifference), abs(Ydifference));
+  
+  //Berechne Schritte pro Schleife
+  //float xStep = (float)abs(Xdifference) / steps;
+  //float yStep = (float)abs(Ydifference) / steps;
+
+  int x = 0;
+  int y = 0;
+  int error = 0;
+
+  int xStep = Xdifference > 0 ? 1 : -1;  //Schrittgröße für X
+  int yStep = Ydifference > 0 ? 1 : -1;  //Schrittgröße für Y
+
+  // Loop über die Gesamtzahl der Schritte
+  for (int i = 0; i < steps; i++) {
+    if (2 * (error + Ydifference) < Xdifference) {  //Wenn der Fehler kleiner ist, bewege X
+      x += xStep;
+      moveX(1, dirX, motorDelayFast);  //Bewege den X-Motor um 1 Schritt
+      error += Ydifference;  //Aktualisiere den Fehlerwert
+    }
+    if (2 * (error + Xdifference) >= Ydifference) {  //Wenn der Fehler größer ist, bewege Y
+      y += yStep;
+      moveY(1, dirY, motorDelayFast);  //Bewege den Y-Motor um 1 Schritt
+      error -= Xdifference;  //Aktualisiere den Fehlerwert
+    }        
+  }
+}
+
+
+
