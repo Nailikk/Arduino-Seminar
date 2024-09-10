@@ -20,10 +20,14 @@ const int motorRDirPin = 4;  //Y-Achse Richtung
 const int motorRStepPin = 5; //Y-Achse Schritt
 
 const int motorDelaySlow = 1000;  //Geschwindigkeit Motor (höherer = langsamer)
-const int motorDelayFast = 400;
+const int motorDelayFast = 500;
 
 const int stepsPerRevolution = 1600; //Anzahl der Schritte pro Umdrehung (abhängig vom Motor)
 const int numberOfRevolutions = 1;  //Anzahl der gewünschten Umdrehungen
+
+const int stepsPerCm = 421;  //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
+const int stepsLong = 40 * stepsPerCm;  //Schritte für 40 cm
+const int step1Cm = stepsPerCm;         //Schritte für 1 cm
 
 void setup() {
   
@@ -85,6 +89,19 @@ void loop() {
     digitalWrite(motorRStepPin, LOW);
     delayMicroseconds(500); 
   }
+}
+
+void drawNumber() {
+    drawZero();
+    drawOne();
+    drawTwo();
+    drawThree();
+    drawFour();
+    drawFive();
+    drawSix();
+    drawSeven();
+    drawEight();
+    drawNine();
 }
 
 void autoHome(){
@@ -192,9 +209,6 @@ void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFas
 }
 
 void Clearboard(){
-  int stepsPerCm = 421;  //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
-  int stepsLong = 40 * stepsPerCm;  //Schritte für 40 cm
-  int step1Cm = stepsPerCm;         //Schritte für 1 cm
   
   Serial.println("Starten von Clearboard");
  
@@ -314,5 +328,177 @@ void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
   }
 }
 
+void drawZero() { 
 
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    // Hoch 20 cm
+    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm zurück
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);    
+    
+    // Runter 20 cm
+    moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+}
+
+void drawOne() {  
+
+    // Hoch 20 cm (gerade Linie)
+    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, -10 * stepsPerCm, motorDelayFast);
+}
+
+void drawTwo() {
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+}
+
+void drawThree() { 
+
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+}
+
+void drawFour() {
+
+    // Hoch 20 cm
+    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    
+    // Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Hoch 20 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+}
+
+void drawFive() {
+
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+}
+
+void drawSix() {
+
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+
+    // Runter 20 cm
+    moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+}
+
+void drawSeven() {
+
+    // Hoch 20 cm
+    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+}
+
+void drawEight() {
+
+    // Hoch 10 cm
+    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+}
+
+void drawNine() {
+
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    // Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    // Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+}
 
