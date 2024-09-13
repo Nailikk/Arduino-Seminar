@@ -1,3 +1,4 @@
+
 //include DHT_sensor_library
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
@@ -55,11 +56,13 @@ void setup() {
 
   autoHome();
 
-  Clearboard();
+  //Clearboard();
 
   Clearboard45();
 
-  moveLinear(421 * -20, 421 * -40, motorDelayFast); //Links LOW, Rechts HIGH,    oben LOW, unten HIGH
+  //moveLinear(stepsPerCm * -20, stepsPerCm * -40, motorDelayFast); //Links LOW, Rechts HIGH,    oben LOW, unten HIGH
+
+
 }
 
 void loop() {
@@ -90,20 +93,20 @@ void loop() {
     delayMicroseconds(500); 
   }
 }
-
+/*
 void drawNumber() {
-    drawZero();
-    drawOne();
-    drawTwo();
-    drawThree();
-    drawFour();
-    drawFive();
-    drawSix();
-    drawSeven();
-    drawEight();
-    drawNine();
+    drawZero(1);
+    drawOne(1);
+    drawTwo(1);
+    drawThree(1);
+    drawFour(1);
+    drawFive(1);
+    drawSix(1);
+    drawSeven(1);
+    drawEight(1);
+    drawNine(1);
 }
-
+*/
 void autoHome(){
 
   Serial.println("Starten von Auto-Home");
@@ -168,6 +171,7 @@ void moveY(int steps, bool direction, int motorDelayFast) {
 }
 
 void moveX(int steps, bool direction, int motorDelayFast) {
+  //Links LOW, Rechts HIGH
   digitalWrite(motorLDirPin, direction);  //Richtung setzen
   digitalWrite(motorRDirPin, direction);  //Beide Motoren in dieselbe Richtung
   for (int i = 0; i < abs(steps); i++) {
@@ -328,177 +332,335 @@ void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
   }
 }
 
-void drawZero() { 
+void drawZero(int digit_position) {
 
-    // Rechts 10 cm
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    
+    //
+  }
+    //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
 
-    // Hoch 20 cm
+    //Hoch 20 cm
     moveLinear(0, 20 * stepsPerCm, motorDelayFast);
     
-    // Links 10 cm zurück
+    //Links 10 cm zurück
     moveLinear(-10 * stepsPerCm, 0, motorDelayFast);    
     
-    // Runter 20 cm
+    //Runter 20 cm
     moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+    //für Nr.2
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
 }
 
-void drawOne() {  
+void drawOne(int digit_position) {
 
-    // Hoch 20 cm (gerade Linie)
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Hoch 20 cm (gerade Linie)
     moveLinear(0, 20 * stepsPerCm, motorDelayFast);
 
-    // Links 10 cm
+    //Links Runter 10 cm
     moveLinear(-10 * stepsPerCm, -10 * stepsPerCm, motorDelayFast);
-}
+    //für Nr.2
+    //Rechts Hoch 10 cm
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
 
-void drawTwo() {
-    
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-    
-    // Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
-    
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-    
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-}
-
-void drawThree() { 
-
-    // Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
-    
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-    
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-
-    // Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
-
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-    
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-}
-
-void drawFour() {
-
-    // Hoch 20 cm
-    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
-    
-    // Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
-
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-    
-    // Hoch 20 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-}
-
-void drawFive() {
-
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-    
-    // Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
-    
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-    
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-}
-
-void drawSix() {
-
-    // Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
-    
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-    
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-    
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
-    
-    // Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
-
-    // Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-
-    // Runter 20 cm
+    //Runter 20 cm
     moveLinear(0, -20 * stepsPerCm, motorDelayFast);
 }
 
-void drawSeven() {
-
-    // Hoch 20 cm
-    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+void drawTwo(int digit_position) {
     
-    // Links 10 cm
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Links 10 cm
     moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
-}
 
-void drawEight() {
-
-    // Hoch 10 cm
-    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
     
-    // Rechts 10 cm
+    //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
     
-    // Runter 10 cm
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //für Nr.2
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Runter 10 cm
     moveLinear(0, -10 * stepsPerCm, motorDelayFast);
     
-    // Links 10 cm
+    //Links 10 cm
     moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
     
-    // Runter 10 cm
+    //Runter 10 cm
     moveLinear(0, -10 * stepsPerCm, motorDelayFast);
     
-    // Rechts 10 cm
+    //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
-    
-    // Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+
 }
 
-void drawNine() {
+void drawThree(int digit_position) {
 
-    // Rechts 10 cm
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
-
-    // Hoch 10 cm
+    
+    //Hoch 10 cm
     moveLinear(0, 10 * stepsPerCm, motorDelayFast);
     
-    // Links 10 cm
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //für Nr.2
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Runter 20 cm
+    moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+}
+
+void drawFour(int digit_position) {
+
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Hoch 20 cm
+    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+
+    //Links 10 cm
     moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
     
-    // Hoch 10 cm
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //für Nr.2
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+}
+
+void drawFive(int digit_position) {
+  
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Hoch 10 cm
     moveLinear(0, 10 * stepsPerCm, motorDelayFast);
     
-    // Rechts 10 cm
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //für Nr.2
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+}
+
+void drawSix(int digit_position) {
+
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
     
-    // Runter 10 cm
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+
+    //Runter 20 cm
+    moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+    //für Nr.2
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+}
+
+void drawSeven(int digit_position) {
+
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Hoch 20 cm
+    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //für Nr.2
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Runter 20 cm
+    moveLinear(0, -20 * stepsPerCm, motorDelayFast);   
+}
+
+void drawEight(int digit_position) {
+
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Hoch 20 cm
+    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //für Nr.2
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+}
+
+void drawNine(int digit_position) {
+
+  if (digit_position == 1) {
+    Serial.println("Nr. 1");
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+  } 
+  else if(digit_position == 2) {
+    Serial.println("Nr. 2");
+    //
+  }
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    //Links 10 cm
+    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    
+    //Hoch 10 cm
+    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    
+    //Rechts 10 cm
+    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    
+    //Runter 10 cm
+    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //für Nr.2
+    //Runter 10 cm
     moveLinear(0, -10 * stepsPerCm, motorDelayFast);
 }
 
