@@ -280,6 +280,9 @@ void Clearboard45(){
     Serial.print("Bewege diagonal nach links unten");
     moveDiagonal(step1Cm * count, LOW, HIGH, 800);  //X nach links, Y nach unten
   }
+  //Für Startpunkt der Zahlen
+  moveY(40 * stepsPerCm, HIGH, motorDelayFast);
+
 }
 
 void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
@@ -341,8 +344,9 @@ void drawZero(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
@@ -369,7 +373,9 @@ void drawOne(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Hoch 20 cm (gerade Linie)
     moveLinear(0, 20 * stepsPerCm, motorDelayFast);
@@ -393,7 +399,9 @@ void drawTwo(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Links 10 cm
     moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
@@ -436,7 +444,9 @@ void drawThree(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
@@ -472,7 +482,9 @@ void drawFour(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Hoch 20 cm
     moveLinear(0, 20 * stepsPerCm, motorDelayFast);
@@ -505,7 +517,9 @@ void drawFive(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
@@ -544,7 +558,9 @@ void drawSix(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
@@ -580,7 +596,9 @@ void drawSeven(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Hoch 20 cm
     moveLinear(0, 20 * stepsPerCm, motorDelayFast);
@@ -604,7 +622,9 @@ void drawEight(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Hoch 20 cm
     moveLinear(0, 20 * stepsPerCm, motorDelayFast);
@@ -640,7 +660,9 @@ void drawNine(int digit_position) {
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2");
-    //
+    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
     //Rechts 10 cm
     moveLinear(10 * stepsPerCm, 0, motorDelayFast);
