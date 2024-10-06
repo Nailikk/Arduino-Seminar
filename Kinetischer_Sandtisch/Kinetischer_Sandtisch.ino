@@ -23,12 +23,12 @@ const int motorRStepPin = 5; //Y-Achse Schritt
 const int motorDelaySlow = 1000;  //Geschwindigkeit Motor (höherer = langsamer)
 const int motorDelayFast = 500;
 
-const int stepsPerRevolution = 1600; //Anzahl der Schritte pro Umdrehung (abhängig vom Motor)
-const int numberOfRevolutions = 1;  //Anzahl der gewünschten Umdrehungen
 
 const int stepsPerCm = 421;  //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
-const int stepsLong = 40 * stepsPerCm;  //Schritte für 40 cm
+const int stepsLong = 30 * stepsPerCm;  //Schritte für 30 cm
 const int step1Cm = stepsPerCm;         //Schritte für 1 cm
+const int one_beam = 7.5;
+const int two_beam = 15;
 
 void setup() {
   
@@ -58,22 +58,24 @@ void setup() {
 
   //Clearboard();
 
+  moveLinear(stepsPerCm * -20, stepsPerCm * 10, motorDelayFast);
+
+  autoHome();
+
   Clearboard45();
 
-  //moveLinear(stepsPerCm * -20, stepsPerCm * -40, motorDelayFast); 
   //Links LOW, Rechts HIGH,    oben LOW, unten HIGH
 
 }
 
 void loop() {
-  
 
   //sensors_event_t event;
   //delay(delayMS);
   //dht.temperature().getEvent(&event);
   //Serial.println(event.temperature);
   /*
-  //Nur zum test 1 Motorumdrehung und Temperatur und feuchtigkeit ausgabe
+ 
   delay(delayMS);
   sensors_event_t event;
 
@@ -86,35 +88,12 @@ void loop() {
   dht.humidity().getEvent(&event);
     Serial.print(event.relative_humidity);
     Serial.println(F("%"));
+  */  
   
-  int totalSteps = stepsPerRevolution * numberOfRevolutions;
-
-  for (int i = 0; i < totalSteps; i++) {
-    //Schritt ausführen
-    digitalWrite(motorLStepPin, HIGH);
-    digitalWrite(motorRStepPin, HIGH);
-    delayMicroseconds(500); //Geschwindigkeit
-    digitalWrite(motorLStepPin, LOW);
-    digitalWrite(motorRStepPin, LOW);
-    delayMicroseconds(500); 
-  }
-  */
   ReadTemperatureEveryTenMinutes();
+
 }
-/*
-void drawNumber(digit_position) {
-    drawZero(digit_position);
-    drawOne(digit_position);
-    drawTwo(digit_position);
-    drawThree(digit_position);
-    drawFour(digit_position);
-    drawFive(digit_position);
-    drawSix(digit_position);
-    drawSeven(digit_position);
-    drawEight(digit_position);
-    drawNine(digit_position);
-}
-*/
+
 void autoHome(){
 
   Serial.println("Starten von Auto-Home");
@@ -128,14 +107,14 @@ void autoHome(){
   while (digitalRead(limitSwitchYPin) == HIGH) {  //Läuft bis der Switch erreicht ist
     //
     digitalWrite(motorLStepPin, HIGH);
-    delayMicroseconds(motorDelaySlow);
+    delayMicroseconds(motorDelayFast);
     digitalWrite(motorRStepPin, HIGH);
-    delayMicroseconds(motorDelaySlow);
+    delayMicroseconds(motorDelayFast);
     //
     digitalWrite(motorLStepPin, LOW);
-    delayMicroseconds(motorDelaySlow);
+    delayMicroseconds(motorDelayFast);
     digitalWrite(motorRStepPin, LOW);
-    delayMicroseconds(motorDelaySlow);
+    delayMicroseconds(motorDelayFast);
   }
   Serial.println("Y-Achse Fertig!");
 
@@ -167,8 +146,7 @@ void autoHome(){
 void moveY(int steps, bool direction, int motorDelayFast) {
   digitalWrite(motorLDirPin, direction);  //Richtung setzen
   digitalWrite(motorRDirPin, !direction); //Andere Achse in Gegenrichtung
-  int stepsfory = abs(steps) / 2;
-  for (int i = 0; i < stepsfory; i++) {
+  for (int i = 0; i < steps; i++) {
     digitalWrite(motorLStepPin, HIGH);
     digitalWrite(motorRStepPin, HIGH);
     delayMicroseconds(motorDelayFast);
@@ -193,7 +171,7 @@ void moveX(int steps, bool direction, int motorDelayFast) {
 }
 
 void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFast) {
-  // Funktion, um gleichmäßig gleichzeitig in X- und Y-Richtung zu fahren
+  //Funktion, um gleichmäßig gleichzeitig in X- und Y-Richtung zu fahren
 
   for (int i = 0; i < Steps; i++) {
     //1 step in x 
@@ -224,10 +202,10 @@ void Clearboard(){
   
   Serial.println("Starten von Clearboard");
  
-  for (int i = 0; i < 20; i++) { //40 cm / 2 = 20 
+  for (int i = 0; i < 15; i++) { // 30 cm / 2 = 15 
 
     //40 cm nach oben fahren
-    Serial.println("40 cm nach oben");
+    Serial.println("30 cm nach oben");
     moveY(stepsLong, LOW, 400);  //Richtung nach oben
 
     //1 cm nach links fahren
@@ -235,7 +213,7 @@ void Clearboard(){
     moveX(step1Cm, LOW, 800);    //Richtung nach links
 
     //40 cm nach unten fahren
-    Serial.println("40 cm nach unten");
+    Serial.println("30 cm nach unten");
     moveY(stepsLong, HIGH, 400);   //Richtung nach unten
 
     //1 cm nach links fahren 
@@ -243,19 +221,19 @@ void Clearboard(){
     moveX(step1Cm, LOW, 800);    //Richtung nach links
   }
 
-  //40 cm Zurück nach rechts 
-  Serial.println("40 cm zurück nach rechts");
-  moveX(stepsLong, HIGH, 400);  //Richtung nach rechts
+   
+  moveY(stepsLong, LOW, 400);  //nacg oben
+  moveY(stepsLong, HIGH, 400);  //nach unten
+  //30 cm Zurück nach rechts
+  Serial.println("30 cm zurück nach rechts");
+  moveX(stepsLong, HIGH, 800);  //Richtung nach rechts
   Serial.println("Clearboard Fertig!");
 }
 
 void Clearboard45(){
-  int stepsPerCm = 421;  //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
-  int stepsLong = 40 * stepsPerCm;  //Schritte für 40 cm
-  int step1Cm = stepsPerCm;         //Schritte für 1 cm
   int count = 0;
 
-  for (int i = 0; i < 20; i++){
+  for (int i = 0; i < 15; i++){
     Serial.println("Starten von Clearboard 45°");
 
     Serial.println("1 cm nach links Nr." + String(i + 1));
@@ -263,33 +241,36 @@ void Clearboard45(){
     count++;
 
     Serial.print("Bewege diagonal nach rechts oben");
-    moveDiagonal(step1Cm * count, HIGH, LOW, 800);  //X nach rechts, Y nach oben
+    moveDiagonal(step1Cm * count, HIGH, LOW, motorDelayFast);  //X nach rechts, Y nach oben
 
     Serial.println("1 cm nach oben Nr." + String(i + 1));
     moveY(step1Cm, LOW, 800);    //Richtung nach oben
     count++;
 
     Serial.print("Bewege diagonal nach links unten");
-    moveDiagonal(step1Cm * count, LOW, HIGH, 800);  //X nach links, Y nach unten
+    moveDiagonal(step1Cm * count, LOW, HIGH, motorDelayFast);  //X nach links, Y nach unten
   }
 
-  for (int i = 0; i < 20; i++){
+  for (int i = 0; i < 15; i++){
     Serial.println("1 cm nach oben Nr." + String(i + 1));
     moveY(step1Cm, LOW, 800);    //Richtung nach oben
     count--;
     
     Serial.print("Bewege diagonal nach rechts oben");
-    moveDiagonal(step1Cm * count, HIGH, LOW, 800);  //X nach rechts, Y nach oben
+    moveDiagonal(step1Cm * count, HIGH, LOW, motorDelayFast);  //X nach rechts, Y nach oben
 
     Serial.println("1 cm nach links Nr." + String(i + 1));
     moveX(step1Cm, LOW, 800);    //Richtung nach links
     count--;
 
     Serial.print("Bewege diagonal nach links unten");
-    moveDiagonal(step1Cm * count, LOW, HIGH, 800);  //X nach links, Y nach unten
+    moveDiagonal(step1Cm * count, LOW, HIGH, motorDelayFast);  //X nach links, Y nach unten
   }
   //Für Startpunkt der Zahlen
-  moveY(40 * stepsPerCm, HIGH, motorDelayFast);
+  moveY(30 * stepsPerCm, HIGH, motorDelayFast);
+    //30 cm Zurück nach rechts
+  Serial.println("30 cm zurück nach rechts");
+  moveX(stepsLong, HIGH, 800);  //Richtung nach rechts
 
 }
 
@@ -363,11 +344,32 @@ void displayTemperature(int temperature) {
 
   int decimal = (int)(temperature * 10) % 10;  //Erste Dezimalstelle
 
+  //Links Unten Ecke für start
+  moveX(stepsLong, LOW, 800);
+
   drawDigit(tens, 1);               //Stelle 1 für Zehner
 
   drawDigit(ones, 2);               //Stelle 2 für Einer
 
   //drawDigit(decimal, 3);             // Stelle 3 für die Dezimalstelle
+}
+
+void decimalPoint(int motorDelayFast){
+    
+    //Rechts 1 cm
+    moveLinear(1 * stepsPerCm, 0, motorDelayFast);
+
+    //Hoch 2 cm
+    moveLinear(0, 2 * stepsPerCm, motorDelayFast);
+    
+    //Links 1 cm 
+    moveLinear(-2 * stepsPerCm, 0, motorDelayFast);    
+    
+    //Runter 2 cm
+    moveLinear(0, -2 * stepsPerCm, motorDelayFast);
+
+    //Rechts 1 cm
+    moveLinear(1 * stepsPerCm, 0, motorDelayFast);
 }
 
 void drawDigit(int digit, int digit_position) {
@@ -410,111 +412,111 @@ void drawZero(int digit_position) {
 
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   } 
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Hoch 20 cm
-    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    //Hoch two_beam
+    moveLinear(0, two_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm zurück
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);    
+    //Links one_beam zurück
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);    
     
-    //Runter 20 cm
-    moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+    //Runter two_beam
+    moveLinear(0, -two_beam * stepsPerCm, motorDelayFast);
     //für Nr.2
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 }
 
 void drawOne(int digit_position) {
 
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Hoch 20 cm (gerade Linie)
-    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    //Hoch two_beam
+    moveLinear(0, two_beam * stepsPerCm, motorDelayFast);
 
-    //Links Runter 10 cm
-    moveLinear(-10 * stepsPerCm, -10 * stepsPerCm, motorDelayFast);
+    //Links Runter one_beam
+    moveLinear(-one_beam * stepsPerCm, -one_beam * stepsPerCm, motorDelayFast);
     //für Nr.2
-    //Rechts Hoch 10 cm
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    //Rechts Hoch one_beam 
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
 
-    //Runter 20 cm
-    moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+    //Runter two_beam 
+    moveLinear(0, -two_beam * stepsPerCm, motorDelayFast);
 }
 
 void drawTwo(int digit_position) {
     
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     //für Nr.2
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
     
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
 }
 
@@ -522,278 +524,278 @@ void drawThree(int digit_position) {
 
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     //für Nr.2
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Runter 20 cm
-    moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+    //Runter two_beam
+    moveLinear(0, -two_beam * stepsPerCm, motorDelayFast);
 }
 
 void drawFour(int digit_position) {
 
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Hoch 20 cm
-    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    //Hoch two_beam
+    moveLinear(0, two_beam * stepsPerCm, motorDelayFast);
     
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
 
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     //für Nr.2
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
 
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
 }
 
 void drawFive(int digit_position) {
   
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
     //für Nr.2
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
 
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
 }
 
 void drawSix(int digit_position) {
 
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Runter 20 cm
-    moveLinear(0, -20 * stepsPerCm, motorDelayFast);
+    //Runter two_beam
+    moveLinear(0, -two_beam * stepsPerCm, motorDelayFast);
     //für Nr.2
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 }
 
 void drawSeven(int digit_position) {
 
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Hoch 20 cm
-    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    //Hoch two_beam
+    moveLinear(0, two_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     //für Nr.2
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Runter 20 cm
-    moveLinear(0, -20 * stepsPerCm, motorDelayFast);   
+    //Runter two_beam
+    moveLinear(0, -two_beam * stepsPerCm, motorDelayFast);   
 }
 
 void drawEight(int digit_position) {
 
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Hoch 20 cm
-    moveLinear(0, 20 * stepsPerCm, motorDelayFast);
+    //Hoch two_beam
+    moveLinear(0, two_beam * stepsPerCm, motorDelayFast);
     
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
     
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     //für Nr.2
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
 }
 
 void drawNine(int digit_position) {
 
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(10 * stepsPerCm, 10 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    //moveX(10 * stepsPerCm, HIGH, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
     //
   }
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
 
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Links 10 cm
-    moveLinear(-10 * stepsPerCm, 0, motorDelayFast);
+    //Links one_beam
+    moveLinear(-one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Hoch 10 cm
-    moveLinear(0, 10 * stepsPerCm, motorDelayFast);
+    //Hoch one_beam
+    moveLinear(0, one_beam * stepsPerCm, motorDelayFast);
     
-    //Rechts 10 cm
-    moveLinear(10 * stepsPerCm, 0, motorDelayFast);
+    //Rechts one_beam
+    moveLinear(one_beam * stepsPerCm, 0, motorDelayFast);
     
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
     //für Nr.2
-    //Runter 10 cm
-    moveLinear(0, -10 * stepsPerCm, motorDelayFast);
+    //Runter one_beam
+    moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
 }
 
