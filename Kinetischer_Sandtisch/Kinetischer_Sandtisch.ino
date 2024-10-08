@@ -4,31 +4,32 @@
 #include <DHT.h>
 #include <DHT_U.h>
 
-#define DHTTYPE DHT11  //DHT 11 (Version)
+#define DHTTYPE DHT11                    //DHT 11 (Version)
 
-#define DHTPIN 11  //Sensor auf Digital Pin 11
+#define DHTPIN 11                        //Sensor auf Digital Pin 11
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
 uint32_t delayMS;
 
-const int limitSwitchYPin = 7;  //X-Achse Limit Switch
-const int limitSwitchXPin = 8;  //Y-Achse Limit Switch
+const int limitSwitchYPin = 7;          //X-Achse Limit Switch
+const int limitSwitchXPin = 8;          //Y-Achse Limit Switch
 
-const int motorLDirPin = 2;  //X-Achse Richtung
-const int motorLStepPin = 3; //X-Achse Schritt
-const int motorRDirPin = 4;  //Y-Achse Richtung
-const int motorRStepPin = 5; //Y-Achse Schritt
+const int motorLDirPin = 2;             //X-Achse Richtung
+const int motorLStepPin = 3;            //X-Achse Schritt
+const int motorRDirPin = 4;             //Y-Achse Richtung
+const int motorRStepPin = 5;            //Y-Achse Schritt
 
-const int motorDelaySlow = 1000;  //Geschwindigkeit Motor (höherer = langsamer)
+const int motorDelaySlow = 1000;        //Geschwindigkeit Motor (höherer = langsamer)
 const int motorDelayFast = 500;
 
+const double faktor = 1.414213;         //für die Berechnung der Hypotenuse
 
-const int stepsPerCm = 421;  //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
+const int stepsPerCm = 421;             //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
 const int stepsLong = 30 * stepsPerCm;  //Schritte für 30 cm
 const int step1Cm = stepsPerCm;         //Schritte für 1 cm
-const int one_beam = 7.5;
-const int two_beam = 15;
+const int one_beam = 7.5;               //ein Segment
+const int two_beam = 15;                //zwei Segmente
 
 void setup() {
   
@@ -170,10 +171,61 @@ void moveX(int steps, bool direction, int motorDelayFast) {
   }
 }
 
-void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFast) {
+void moveDiagonal(int steps, bool xDirection, bool yDirection, int motorDelayFast) {
   //Funktion, um gleichmäßig gleichzeitig in X- und Y-Richtung zu fahren
+  
+  double stepsDiagonal = steps * faktor;
 
-  for (int i = 0; i < Steps; i++) {
+  if (xDirection == HIGH){        //Links LOW, Rechts HIGH
+
+      if (yDirection == LOW){    //oben LOW, unten HIGH
+        //digitalWrite(motorLDirPin, -);
+        digitalWrite(motorRDirPin, HIGH);
+        for (int i = 0; i < stepsDiagonal; i++) {
+          digitalWrite(motorRStepPin, HIGH);
+          delayMicroseconds(motorDelayFast);
+          digitalWrite(motorRStepPin, LOW);
+          delayMicroseconds(motorDelayFast);
+        }
+      } 
+      else if (yDirection == HIGH) {
+        digitalWrite(motorLDirPin, HIGH);
+        //digitalWrite(motorRDirPin, -);
+        for (int i = 0; i < stepsDiagonal; i++) {
+          digitalWrite(motorLStepPin, HIGH);
+          delayMicroseconds(motorDelayFast);
+          digitalWrite(motorLStepPin, LOW);
+          delayMicroseconds(motorDelayFast);
+        }
+      }
+  } else if (xDirection == LOW) {
+
+      if (yDirection == LOW){
+        //digitalWrite(motorLDirPin, -);
+        digitalWrite(motorRDirPin, LOW);
+        for (int i = 0; i < stepsDiagonal; i++) {
+          digitalWrite(motorRStepPin, HIGH);
+          delayMicroseconds(motorDelayFast);
+          digitalWrite(motorRStepPin, LOW);
+          delayMicroseconds(motorDelayFast);         
+        }
+      } 
+      else if ((yDirection == HIGH)) {
+        digitalWrite(motorLDirPin, LOW);
+        //digitalWrite(motorRDirPin, -);
+        for (int i = 0; i < stepsDiagonal; i++) {
+          digitalWrite(motorLStepPin, HIGH);
+          delayMicroseconds(motorDelayFast);
+          digitalWrite(motorLStepPin, LOW);
+          delayMicroseconds(motorDelayFast);
+        }
+      }
+  }
+
+  /*
+  for (int i = 0; i < stepsDiagonal; i++) {
+    
+    
     //1 step in x 
     digitalWrite(motorLDirPin, xDirection);  //Links LOW, Rechts HIGH
     digitalWrite(motorRDirPin, xDirection);
@@ -196,6 +248,7 @@ void moveDiagonal(int Steps, bool xDirection, bool yDirection, int motorDelayFas
     digitalWrite(motorRStepPin, LOW);
     delayMicroseconds(motorDelayFast);
   }
+  */
 }
 
 void Clearboard(){
@@ -224,10 +277,6 @@ void Clearboard(){
    
   moveY(stepsLong, LOW, 400);  //nacg oben
   moveY(stepsLong, HIGH, 400);  //nach unten
-  //30 cm Zurück nach rechts
-  Serial.println("30 cm zurück nach rechts");
-  moveX(stepsLong, HIGH, 800);  //Richtung nach rechts
-  Serial.println("Clearboard Fertig!");
 }
 
 void Clearboard45(){
@@ -268,9 +317,6 @@ void Clearboard45(){
   }
   //Für Startpunkt der Zahlen
   moveY(30 * stepsPerCm, HIGH, motorDelayFast);
-    //30 cm Zurück nach rechts
-  Serial.println("30 cm zurück nach rechts");
-  moveX(stepsLong, HIGH, 800);  //Richtung nach rechts
 
 }
 
@@ -306,20 +352,20 @@ void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
   int y = 0;
   int error = 0;
 
-  int xStep = Xdifference > 0 ? 1 : -1;  //Schrittgröße für X
-  int yStep = Ydifference > 0 ? 1 : -1;  //Schrittgröße für Y
+  int xStep = abs(Xdifference) > 0 ? 1 : -1;  //Schrittgröße für X
+  int yStep = abs(Ydifference) > 0 ? 1 : -1;  //Schrittgröße für Y
 
   //Loop für die Gesamtzahl Schritte
   for (int i = 0; i < steps; i++) {
-    if (2 * (error + Ydifference) < Xdifference) {  //Wenn Fehler kleiner ist, bewege X
+    if (2 * (error + abs(Ydifference)) < abs(Xdifference)) {  //Wenn Fehler kleiner ist, bewege X
       x += xStep;
       moveX(1, dirX, motorDelayFast);  //Bewege X-Motor 1 Schritt
-      error += Ydifference;  //Aktualisiere Fehlerwert
+      error += abs(Ydifference);  //Aktualisiere Fehlerwert
     }
-    if (2 * (error + Xdifference) >= Ydifference) {  //Wenn Fehler größer ist, bewege Y
+    if (2 * (error + abs(Xdifference)) >= abs(Ydifference)) {  //Wenn Fehler größer ist, bewege Y
       y += yStep;
       moveY(1, dirY, motorDelayFast);  //Bewege Y-Motor 1 Schritt
-      error -= Xdifference;  //Aktualisiere Fehlerwert
+      error -= abs(Xdifference);  //Aktualisiere Fehlerwert
     }        
   }
 }
@@ -343,9 +389,6 @@ void displayTemperature(int temperature) {
   int ones = temperature % 10;      //Einerstelle
 
   int decimal = (int)(temperature * 10) % 10;  //Erste Dezimalstelle
-
-  //Links Unten Ecke für start
-  moveX(stepsLong, LOW, 800);
 
   drawDigit(tens, 1);               //Stelle 1 für Zehner
 
