@@ -65,7 +65,7 @@ void setup() {
 
   Clearboard45();
 
-  //Links LOW, Rechts HIGH,    oben LOW, unten HIGH
+  //Links LOW, Rechts HIGH, oben LOW, unten HIGH
 
 }
 
@@ -176,50 +176,50 @@ void moveDiagonal(int steps, bool xDirection, bool yDirection, int motorDelayFas
   
   double stepsDiagonal = steps * faktor;
 
-  if (xDirection == HIGH){        //Links LOW, Rechts HIGH
+  if (xDirection == HIGH){                        //Rechts HIGH
 
-      if (yDirection == LOW){    //oben LOW, unten HIGH
-        //digitalWrite(motorLDirPin, -);
-        digitalWrite(motorRDirPin, HIGH);
-        for (int i = 0; i < stepsDiagonal; i++) {
-          digitalWrite(motorRStepPin, HIGH);
-          delayMicroseconds(motorDelayFast);
-          digitalWrite(motorRStepPin, LOW);
-          delayMicroseconds(motorDelayFast);
-        }
-      } 
-      else if (yDirection == HIGH) {
-        digitalWrite(motorLDirPin, HIGH);
-        //digitalWrite(motorRDirPin, -);
-        for (int i = 0; i < stepsDiagonal; i++) {
-          digitalWrite(motorLStepPin, HIGH);
-          delayMicroseconds(motorDelayFast);
-          digitalWrite(motorLStepPin, LOW);
-          delayMicroseconds(motorDelayFast);
-        }
+    if (yDirection == LOW){                       //oben LOW
+      //digitalWrite(motorLDirPin, HIGH);         //
+      digitalWrite(motorRDirPin, HIGH);           //
+      for (int i = 0; i < stepsDiagonal; i++) {
+        digitalWrite(motorRStepPin, HIGH);
+        delayMicroseconds(motorDelayFast);
+        digitalWrite(motorRStepPin, LOW);
+        delayMicroseconds(motorDelayFast);
       }
-  } else if (xDirection == LOW) {
+    } 
+    else if (yDirection == HIGH) {                //unten HIGH
+      digitalWrite(motorLDirPin, HIGH);           //
+      //digitalWrite(motorRDirPin, HIGH);         //
+      for (int i = 0; i < stepsDiagonal; i++) {
+        digitalWrite(motorLStepPin, HIGH);
+        delayMicroseconds(motorDelayFast);
+        digitalWrite(motorLStepPin, LOW);
+        delayMicroseconds(motorDelayFast);
+      }
+    }
+  } else if (xDirection == LOW) {                 //Links LOW
 
-      if (yDirection == LOW){
-        //digitalWrite(motorLDirPin, -);
-        digitalWrite(motorRDirPin, LOW);
-        for (int i = 0; i < stepsDiagonal; i++) {
-          digitalWrite(motorRStepPin, HIGH);
-          delayMicroseconds(motorDelayFast);
-          digitalWrite(motorRStepPin, LOW);
-          delayMicroseconds(motorDelayFast);         
-        }
-      } 
-      else if ((yDirection == HIGH)) {
-        digitalWrite(motorLDirPin, LOW);
-        //digitalWrite(motorRDirPin, -);
-        for (int i = 0; i < stepsDiagonal; i++) {
-          digitalWrite(motorLStepPin, HIGH);
-          delayMicroseconds(motorDelayFast);
-          digitalWrite(motorLStepPin, LOW);
-          delayMicroseconds(motorDelayFast);
-        }
+    if (yDirection == LOW){                       //oben LOW
+      digitalWrite(motorLDirPin, LOW);            //
+      //digitalWrite(motorRDirPin, LOW);         //
+      for (int i = 0; i < stepsDiagonal; i++) {
+        digitalWrite(motorLStepPin, HIGH);
+        delayMicroseconds(motorDelayFast);
+        digitalWrite(motorLStepPin, LOW);
+        delayMicroseconds(motorDelayFast);         
       }
+    } 
+    else if ((yDirection == HIGH)) {              //unten HIGH
+      //digitalWrite(motorLDirPin, LOW);          //
+      digitalWrite(motorRDirPin, LOW);            //
+      for (int i = 0; i < stepsDiagonal; i++) {
+        digitalWrite(motorRStepPin, HIGH);
+        delayMicroseconds(motorDelayFast);
+        digitalWrite(motorRStepPin, LOW);
+        delayMicroseconds(motorDelayFast);
+      }
+    }
   }
 
   /*
