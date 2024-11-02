@@ -4,6 +4,8 @@
 #include <DHT.h>
 #include <DHT_U.h>
 
+//#include <cmath>
+
 #define DHTTYPE DHT11                    //DHT 11 (Version)
 
 #define DHTPIN 11                        //Sensor auf Digital Pin 11
@@ -23,7 +25,7 @@ const int motorRStepPin = 5;            //Y-Achse Schritt
 const int motorDelaySlow = 1000;        //Geschwindigkeit Motor (höherer = langsamer)
 const int motorDelayFast = 500;
 
-const double faktor = 1.414213;         //für die Berechnung der Hypotenuse
+const double faktor = 2; //+ (1.414213 * (9/31.7));         //für die Berechnung der Hypotenuse wurzel 2 (+ behebung differenz)
 
 const int stepsPerCm = 421;             //Anzahl der Schritte für 1 cm   1600/3.8   12.1 x pi =38 mm 3.8cm
 const int stepsLong = 30 * stepsPerCm;  //Schritte für 30 cm
@@ -54,16 +56,16 @@ void setup() {
   pinMode(motorRDirPin, OUTPUT);
   pinMode(motorRStepPin, OUTPUT);
 
+  delay(1000);
+  //autoHome();
 
-  autoHome();
+  //
 
+  //autoHome();
+  //moveLinear(5 * stepsPerCm + one_beam * stepsPerCm, 0, motorDelayFast);
   //Clearboard();
-
-  moveLinear(stepsPerCm * -20, stepsPerCm * 10, motorDelayFast);
-
-  autoHome();
-
-  Clearboard45();
+  //drawDigit(2, 3);
+  //Clearboard45();
 
   //Links LOW, Rechts HIGH, oben LOW, unten HIGH
 
@@ -75,8 +77,8 @@ void loop() {
   //delay(delayMS);
   //dht.temperature().getEvent(&event);
   //Serial.println(event.temperature);
+  
   /*
- 
   delay(delayMS);
   sensors_event_t event;
 
@@ -89,9 +91,48 @@ void loop() {
   dht.humidity().getEvent(&event);
     Serial.print(event.relative_humidity);
     Serial.println(F("%"));
-  */  
+  */
+
+  //moveLinear(900, 300, motorDelayFast);
+  autoHome();
+  moveLinear(-30 * stepsPerCm, 0, motorDelayFast);
+  drawSpiral(15*stepsPerCm, 15*stepsPerCm, step1Cm*0.2, 10);
   
-  ReadTemperatureEveryTenMinutes();
+  //moveLinear(15*stepsPerCm, 15*stepsPerCm, motorDelayFast);
+  //test_dimensions();
+  //autoHome();
+  //Clearboard45(); 
+  
+  //ReadTemperatureEveryTenMinutes();
+
+  delay(600000);  //10 Minuten = 600000 ms
+  Serial.println("wait 10 min");
+
+  //delay(1000);
+  //autoHome();
+  //Clearboard();
+  //moveLinear(-30 * stepsPerCm, 0, motorDelayFast);
+  //humidityGraph();
+}
+
+void test_dimensions() {
+
+ // for (int i = 0; i < 36; i++){
+  
+  moveLinear(4000, 4000, motorDelayFast);
+  moveLinear(-4000, -4000, motorDelayFast);
+  moveLinear(4000, 0, motorDelayFast);
+  moveLinear(-4000, 0, motorDelayFast);
+  moveLinear(3200, 800, motorDelayFast);
+  moveLinear(-3200, -800, motorDelayFast);
+  moveLinear(2400, 1600, motorDelayFast);
+  moveLinear(-2400, -1600, motorDelayFast);
+  moveLinear(1600, 2400, motorDelayFast);
+  moveLinear(-1600, -2400, motorDelayFast);
+  moveLinear(800, 3200, motorDelayFast);
+  moveLinear(-800, -3200, motorDelayFast);
+  moveLinear(0, 4000, motorDelayFast);
+  moveLinear(0, -4000, motorDelayFast);
 
 }
 
@@ -141,10 +182,12 @@ void autoHome(){
   Serial.println("X-Achse Fertig!");
 
   Serial.println("Auto-Home Fertig!");
+  delay(1000);
 
 }
 
 void moveY(int steps, bool direction, int motorDelayFast) {
+  //oben LOW, unten HIGH
   digitalWrite(motorLDirPin, direction);  //Richtung setzen
   digitalWrite(motorRDirPin, !direction); //Andere Achse in Gegenrichtung
   for (int i = 0; i < steps; i++) {
@@ -202,7 +245,7 @@ void moveDiagonal(int steps, bool xDirection, bool yDirection, int motorDelayFas
 
     if (yDirection == LOW){                       //oben LOW
       digitalWrite(motorLDirPin, LOW);            //
-      //digitalWrite(motorRDirPin, LOW);         //
+      //digitalWrite(motorRDirPin, LOW);          //
       for (int i = 0; i < stepsDiagonal; i++) {
         digitalWrite(motorLStepPin, HIGH);
         delayMicroseconds(motorDelayFast);
@@ -276,7 +319,10 @@ void Clearboard(){
 
    
   moveY(stepsLong, LOW, 400);  //nacg oben
-  moveY(stepsLong, HIGH, 400);  //nach unten
+  moveY(stepsLong , HIGH, 400);  //nach unten
+
+  moveLinear(stepsLong, 0, motorDelayFast);
+  moveLinear(-stepsLong, 0, motorDelayFast);
 }
 
 void Clearboard45(){
@@ -286,14 +332,14 @@ void Clearboard45(){
     Serial.println("Starten von Clearboard 45°");
 
     Serial.println("1 cm nach links Nr." + String(i + 1));
-    moveX(step1Cm, LOW, 800);    //Richtung nach links
+    moveX(step1Cm, LOW, 800);                                  //Richtung nach links
     count++;
 
     Serial.print("Bewege diagonal nach rechts oben");
     moveDiagonal(step1Cm * count, HIGH, LOW, motorDelayFast);  //X nach rechts, Y nach oben
 
     Serial.println("1 cm nach oben Nr." + String(i + 1));
-    moveY(step1Cm, LOW, 800);    //Richtung nach oben
+    moveY(step1Cm, LOW, 800);                                  //Richtung nach oben
     count++;
 
     Serial.print("Bewege diagonal nach links unten");
@@ -302,77 +348,171 @@ void Clearboard45(){
 
   for (int i = 0; i < 15; i++){
     Serial.println("1 cm nach oben Nr." + String(i + 1));
-    moveY(step1Cm, LOW, 800);    //Richtung nach oben
+    moveY(step1Cm, LOW, 800);                                  //Richtung nach oben
     count--;
     
     Serial.print("Bewege diagonal nach rechts oben");
     moveDiagonal(step1Cm * count, HIGH, LOW, motorDelayFast);  //X nach rechts, Y nach oben
 
     Serial.println("1 cm nach links Nr." + String(i + 1));
-    moveX(step1Cm, LOW, 800);    //Richtung nach links
+    moveX(step1Cm, LOW, 800);                                  //Richtung nach links
     count--;
 
     Serial.print("Bewege diagonal nach links unten");
     moveDiagonal(step1Cm * count, LOW, HIGH, motorDelayFast);  //X nach links, Y nach unten
   }
-  //Für Startpunkt der Zahlen
-  moveY(30 * stepsPerCm, HIGH, motorDelayFast);
+  //Für Startpunkt der Zahlen (unten links)
+  moveY(stepsLong * 0.8, HIGH, motorDelayFast);
 
 }
 
 void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
-  //für Linieare Bewegungen auf 2-Achsen
-
+  //Lineare Bewegung auf 2 Achsen
   bool dirX;
   bool dirY;
 
-  //Richtung für die move x & y funktionen geben
+  //Richtungen für die Bewegung festlegen
   if (Xdifference > 0) {
     Serial.println("Nach Rechts");
     dirX = HIGH;  //Links LOW, Rechts HIGH
-
-  } else if (Xdifference < 0) {
+  } else if (Xdifference <= 0) {
     Serial.println("Nach Links");
-    dirX = LOW;   //Links LOW, Rechts HIGH
+    dirX = LOW;
   }
 
   if (Ydifference > 0) {
     Serial.println("Nach Oben");
-    dirY = LOW;  //oben LOW, unten HIGH
-
-  } else if (Ydifference < 0) {
+    dirY = LOW;  //Oben LOW, Unten HIGH
+  } else if (Ydifference <= 0) {
     Serial.println("Nach Unten");
-    dirY = HIGH;  //oben LOW, unten HIGH
+    dirY = HIGH;
   }
 
-  //Maximale Anzahl Schritten (längere Achse)
-  int steps = max(abs(Xdifference), abs(Ydifference));
-
-  int x = 0;
-  int y = 0;
-  int error = 0;
-
-  int xStep = abs(Xdifference) > 0 ? 1 : -1;  //Schrittgröße für X
-  int yStep = abs(Ydifference) > 0 ? 1 : -1;  //Schrittgröße für Y
-
-  //Loop für die Gesamtzahl Schritte
-  for (int i = 0; i < steps; i++) {
-    if (2 * (error + abs(Ydifference)) < abs(Xdifference)) {  //Wenn Fehler kleiner ist, bewege X
-      x += xStep;
-      moveX(1, dirX, motorDelayFast);  //Bewege X-Motor 1 Schritt
-      error += abs(Ydifference);  //Aktualisiere Fehlerwert
+  //Sonderfall Rein vertikale Bewegung
+  if (Xdifference == 0) {
+    for (int i = 0; i < abs(Ydifference); i++) {
+      moveY(1, dirY, motorDelayFast);
     }
-    if (2 * (error + abs(Xdifference)) >= abs(Ydifference)) {  //Wenn Fehler größer ist, bewege Y
-      y += yStep;
-      moveY(1, dirY, motorDelayFast);  //Bewege Y-Motor 1 Schritt
-      error -= abs(Xdifference);  //Aktualisiere Fehlerwert
-    }        
+    return;  //Beenden da vollständig 
+  }
+
+  //Sonderfall Rein horizontale Bewegung
+  if (Ydifference == 0) {
+    for (int i = 0; i < abs(Xdifference); i++) {
+      moveX(1, dirX, motorDelayFast);
+    }
+    return;  //Beenden da vollständig
+  }
+
+  //Maximale Anzahl Schritte (längere Achse) für diagonale Bewegung
+  int steps = max(abs(Xdifference), abs(Ydifference));
+  int error = 0;
+  int xStep = Xdifference > 0 ? 1 : -1;
+  int yStep = Ydifference > 0 ? 1 : -1;
+  
+  if (abs(Xdifference) <= abs(Ydifference)){
+
+    for (int i = 0; i < steps; i++) {
+
+      if (2 * abs(error) < abs(Ydifference)) {  //Y wird häufiger bewegt
+        moveY(1, dirY, motorDelayFast);
+        error += abs(Xdifference);
+      }
+      if (2 * abs(error) >= abs(Xdifference)) {  //X wird häufiger bewegt
+        moveX(1, dirX, motorDelayFast);
+        error -= abs(Ydifference);
+      }
+    }
+  } else {
+
+    for (int i = 0; i < steps; i++) {
+
+      if (2 * abs(error) < abs(Xdifference)) {  
+        moveX(1, dirX, motorDelayFast);
+        error += abs(Ydifference);
+      }
+      if (2 * abs(error) >= abs(Ydifference)) { 
+        moveY(1, dirY, motorDelayFast);
+        error -= abs(Xdifference);
+      }
+    }
+  }
+
+
+}
+
+void moveLinearNEU(int Xdifference, int Ydifference, int motorDelayFast) {
+  //Lineare Bewegung auf 2 Achsen
+  bool dirX;
+  bool dirY;
+
+  //Richtungen für die Bewegung festlegen
+  if (Xdifference > 0) {
+    Serial.println("Nach Rechts");
+    dirX = HIGH;  //Links LOW, Rechts HIGH
+  } else if (Xdifference <= 0) {
+    Serial.println("Nach Links");
+    dirX = LOW;
+  }
+
+  if (Ydifference > 0) {
+    Serial.println("Nach Oben");
+    dirY = LOW;  //Oben LOW, Unten HIGH
+  } else if (Ydifference <= 0) {
+    Serial.println("Nach Unten");
+    dirY = HIGH;
+  }
+
+  //Maximale Anzahl Schritte (längere Achse) für diagonale Bewegung
+  int stepsMin = min(abs(Xdifference), abs(Ydifference));
+  int stepsMax = max(abs(Xdifference), abs(Ydifference));
+  int Abweichung = 0;
+  int xStep = Xdifference > 0 ? 1 : -1;
+  int yStep = Ydifference > 0 ? 1 : -1;
+  int minRichtung;
+
+  if (Xdifference < Ydifference){
+    int minRichtung = 1; //minrichtung x
+  } else{
+    int minRichtung = 0; //minrichtung y
+  }
+
+  //Sonderfall Rein vertikale Bewegung
+  if (Xdifference == 0) {
+    for (int i = 0; i < abs(Ydifference); i++) {
+      moveY(1, dirY, motorDelayFast);
+    }
+    return;  //Beenden da vollständig 
+  }
+
+  //Sonderfall Rein horizontale Bewegung
+  if (Ydifference == 0) {
+    for (int i = 0; i < abs(Xdifference); i++) {
+      moveX(1, dirX, motorDelayFast);
+    }
+    return;  //Beenden da vollständig
+  }
+  int stepsMinRemaining = stepsMin;
+  for (int i = 0; i < stepsMin; i++) {
+    
+    float ratio = stepsMax / stepsMinRemaining;
+
+    if(minRichtung == 1){
+      moveX(1, dirX, motorDelayFast);
+      moveY((int)ratio, dirY, motorDelayFast);
+      stepsMinRemaining -= 1;
+      stepsMax -= (int)ratio;
+    } else{
+      moveY(1, dirY, motorDelayFast);
+      moveX((int)ratio, dirX, motorDelayFast);
+      stepsMinRemaining -= 1;
+      stepsMax -= (int)ratio;
+
+    }
   }
 }
 
 void ReadTemperatureEveryTenMinutes() {
-
-  delay(600000);  //10 Minuten = 600000 ms
 
   sensors_event_t event;
   dht.temperature().getEvent(&event);
@@ -381,6 +521,7 @@ void ReadTemperatureEveryTenMinutes() {
 
   //Ausgabe der Temperatur auf 2 Stellen
   displayTemperature((int)event.temperature);
+
 }
 
 void displayTemperature(int temperature) {
@@ -453,16 +594,18 @@ void drawDigit(int digit, int digit_position) {
 
 void drawZero(int digit_position) {
 
+  Serial.println("0");
+
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   } 
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -489,13 +632,13 @@ void drawOne(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
     moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -519,13 +662,13 @@ void drawTwo(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -568,13 +711,13 @@ void drawThree(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -610,13 +753,13 @@ void drawFour(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -649,13 +792,13 @@ void drawFive(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -694,7 +837,7 @@ void drawSix(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
@@ -736,13 +879,13 @@ void drawSeven(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
-    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
+    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -766,13 +909,13 @@ void drawEight(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -808,13 +951,13 @@ void drawNine(int digit_position) {
   if (digit_position == 1) {
     Serial.println("Nr. 1 (Zehnerstelle)");
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(one_beam * stepsPerCm, one_beam * stepsPerCm, motorDelayFast);
+    moveLinear(6 * stepsPerCm, 0.5 * one_beam * stepsPerCm, motorDelayFast);
   } 
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
-    moveLinear(5 * stepsPerCm, -5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
     //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
-    moveLinear(5 * stepsPerCm, 5 * stepsPerCm, motorDelayFast);
+    moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
     Serial.println("Nr. 3 (Dezimalstelle)");
@@ -840,5 +983,88 @@ void drawNine(int digit_position) {
     //für Nr.2
     //Runter one_beam
     moveLinear(0, -one_beam * stepsPerCm, motorDelayFast);
+}
+
+void humidityGraph(){
+
+  float humidity;
+  float prevHumidity = humidity;
+
+  sensors_event_t event;
+  dht.humidity().getEvent(&event);
+  Serial.print((int)event.relative_humidity);
+  Serial.println(F("%"));
+  Serial.println(event.relative_humidity / 100);
+
+  prevHumidity = event.relative_humidity / 100;
+
+  moveLinear(0, (event.relative_humidity / 100) * stepsLong, motorDelayFast);
+
+  for (int i = 1; i < 10; i++) {
+
+    //Luftfeuchtigkeit auslesen
+    sensors_event_t event;
+    dht.humidity().getEvent(&event);
+    Serial.print((int)event.relative_humidity);
+    Serial.println(F("%"));
+
+    //humidity = event.relative_humidity / 100;
+    humidity = random(28, 90) / 100.0;
+
+    Serial.println(humidity);
+
+    //Differenz berechnen
+    float yChange = (humidity - prevHumidity); //Differenz als Höhe
+    Serial.print("Diff. ");
+    Serial.println(yChange);
+    Serial.print("Diff. Ganz ");
+    Serial.println(yChange * stepsLong);
+    delay(5000);
+
+    //Graph bewegen
+    moveGraph(yChange); 
+    prevHumidity = humidity;  //Speichern von Luftfeuchtigkeit für den nächsten Vergleich
+
+    Serial.print("Nr. ");
+    Serial.println(i);
+    Serial.println();
+    delay(10000); //20 Sekunden warten
+  }
+}
+
+void moveGraph(float yChange) {
+  int stepsDiff = yChange * stepsLong;
+  Serial.print("Diff. Steps ");
+  Serial.println(stepsDiff);
+  moveLinear(3 * stepsPerCm, stepsDiff, motorDelayFast);
+}
+
+void drawSpiral(float x_start, float y_start, float a, int turns) {
+
+  //Parameter
+  float theta_increment = 0.1; //Inkrement für den Winkel
+  float max_theta = turns * 2 * M_PI; //Maximalwinkel = Umdrehungen*2*PI
+
+  //Startposition
+  double x0 = x_start;
+  double y0 = y_start;
+  double x1 = x_start;
+  double y1 = y_start;
+
+  //Startposition Motoren
+  moveLinear(x0, y0, motorDelayFast); 
+
+  
+
+  //Drucken der Spirale
+  for (float theta = 0; theta <= max_theta; theta += theta_increment) {
+    double r = a * theta; //Radius
+    x1 = x_start + r * cos(theta); //x-Koordinate Zielpunkt       
+    y1 = y_start + r * sin(theta); //y-Koordinate Zielpunkt   
+    //Code zum Steuern der Motoren etwa        
+    moveLinear(x1-x0, y1-y0, motorDelayFast);
+    x0 = x1;
+    y0 = y1;
+  }
 }
 
