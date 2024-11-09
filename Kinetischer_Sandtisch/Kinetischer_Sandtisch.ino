@@ -37,7 +37,6 @@ void setup() {
   
   Serial.begin(9600);
 
-
   dht.begin();  //Gerät initialisieren
   sensor_t sensor;
   dht.temperature().getSensor(&sensor); //Temperatur
@@ -56,83 +55,35 @@ void setup() {
   pinMode(motorRDirPin, OUTPUT);
   pinMode(motorRStepPin, OUTPUT);
 
-  delay(1000);
-  //autoHome();
+  delay(1500);  //Damit keine Bewegung beim Anschalten ausgeführt wird
 
-  //
-
-  //autoHome();
-  //moveLinear(5 * stepsPerCm + one_beam * stepsPerCm, 0, motorDelayFast);
-  //Clearboard();
-  //drawDigit(2, 3);
-  //Clearboard45();
-
-  //Links LOW, Rechts HIGH, oben LOW, unten HIGH
+  test_dimensions();
 
 }
 
 void loop() {
 
-  //sensors_event_t event;
-  //delay(delayMS);
-  //dht.temperature().getEvent(&event);
-  //Serial.println(event.temperature);
-  
-  /*
-  delay(delayMS);
-  sensors_event_t event;
-
-  //Abrufen der Temperatur und ausgabe.
-  dht.temperature().getEvent(&event);
-    Serial.print(event.temperature);
-    Serial.println(F("C°"));
-  
-  //Abrufen der Feuchtigkeits und ausgabe.
-  dht.humidity().getEvent(&event);
-    Serial.print(event.relative_humidity);
-    Serial.println(F("%"));
-  */
-
-  //moveLinear(900, 300, motorDelayFast);
   autoHome();
-  moveLinear(-30 * stepsPerCm, 0, motorDelayFast);
-  drawSpiral(15*stepsPerCm, 15*stepsPerCm, step1Cm*0.2, 10);
+  Clearboard45(); 
   
-  //moveLinear(15*stepsPerCm, 15*stepsPerCm, motorDelayFast);
-  //test_dimensions();
-  //autoHome();
-  //Clearboard45(); 
-  
-  //ReadTemperatureEveryTenMinutes();
+  ReadTemperatureEveryTenMinutes();
+  Serial.println("wait 5 min");
+  delay(300000);  //10 Minuten = 600000 ms, 5 = 300000
 
-  delay(600000);  //10 Minuten = 600000 ms
-  Serial.println("wait 10 min");
+  autoHome();
+  Clearboard();
 
-  //delay(1000);
-  //autoHome();
-  //Clearboard();
-  //moveLinear(-30 * stepsPerCm, 0, motorDelayFast);
-  //humidityGraph();
+  humidityGraph();
+
+  autoHome();
+  moveLinear(-31 * stepsPerCm, 0, motorDelayFast);
+  drawSpiral(15*stepsPerCm, 15*stepsPerCm, step1Cm*0.2, 12);
+
+  delay(300000);  //10 Minuten = 600000 ms, 5 = 300000
+
 }
 
 void test_dimensions() {
-
- // for (int i = 0; i < 36; i++){
-  
-  moveLinear(4000, 4000, motorDelayFast);
-  moveLinear(-4000, -4000, motorDelayFast);
-  moveLinear(4000, 0, motorDelayFast);
-  moveLinear(-4000, 0, motorDelayFast);
-  moveLinear(3200, 800, motorDelayFast);
-  moveLinear(-3200, -800, motorDelayFast);
-  moveLinear(2400, 1600, motorDelayFast);
-  moveLinear(-2400, -1600, motorDelayFast);
-  moveLinear(1600, 2400, motorDelayFast);
-  moveLinear(-1600, -2400, motorDelayFast);
-  moveLinear(800, 3200, motorDelayFast);
-  moveLinear(-800, -3200, motorDelayFast);
-  moveLinear(0, 4000, motorDelayFast);
-  moveLinear(0, -4000, motorDelayFast);
 
 }
 
@@ -407,8 +358,6 @@ void moveLinear(int Xdifference, int Ydifference, int motorDelayFast) {
   //Maximale Anzahl Schritte (längere Achse) für diagonale Bewegung
   int steps = max(abs(Xdifference), abs(Ydifference));
   int error = 0;
-  int xStep = Xdifference > 0 ? 1 : -1;
-  int yStep = Ydifference > 0 ? 1 : -1;
   
   if (abs(Xdifference) <= abs(Ydifference)){
 
@@ -1008,8 +957,8 @@ void humidityGraph(){
     Serial.print((int)event.relative_humidity);
     Serial.println(F("%"));
 
-    //humidity = event.relative_humidity / 100;
-    humidity = random(28, 90) / 100.0;
+    humidity = event.relative_humidity / 100;
+    //humidity = random(28, 90) / 100.0; //zum Testen
 
     Serial.println(humidity);
 
@@ -1028,7 +977,7 @@ void humidityGraph(){
     Serial.print("Nr. ");
     Serial.println(i);
     Serial.println();
-    delay(10000); //20 Sekunden warten
+    delay(20000); //40 Sekunden warten
   }
 }
 
@@ -1041,8 +990,11 @@ void moveGraph(float yChange) {
 
 void drawSpiral(float x_start, float y_start, float a, int turns) {
 
+  float theta = 0;
   //Parameter
-  float theta_increment = 0.1; //Inkrement für den Winkel
+  //float theta_increment = 0.1; //Inkrement für den Winkel
+  float theta_increment = calculateThetaIncrement(theta); //Wächst mit theta, von min 0.01 auf max 0.2
+
   float max_theta = turns * 2 * M_PI; //Maximalwinkel = Umdrehungen*2*PI
 
   //Startposition
@@ -1054,17 +1006,27 @@ void drawSpiral(float x_start, float y_start, float a, int turns) {
   //Startposition Motoren
   moveLinear(x0, y0, motorDelayFast); 
 
-  
-
   //Drucken der Spirale
-  for (float theta = 0; theta <= max_theta; theta += theta_increment) {
+  for (float theta = 14; theta <= max_theta; theta += theta_increment) {
+
+    theta_increment = calculateThetaIncrement(theta); //Aktualisieren des Werts in jedem Schritt
+
     double r = a * theta; //Radius
+
     x1 = x_start + r * cos(theta); //x-Koordinate Zielpunkt       
-    y1 = y_start + r * sin(theta); //y-Koordinate Zielpunkt   
-    //Code zum Steuern der Motoren etwa        
+    y1 = y_start + r * sin(theta); //y-Koordinate Zielpunkt 
+     
+    //Code zum Steuern der Motoren   
     moveLinear(x1-x0, y1-y0, motorDelayFast);
+
     x0 = x1;
     y0 = y1;
   }
 }
 
+float calculateThetaIncrement(float theta) {
+
+  //Start bei 0.25 und reduziert sich, ohne unter 0.07 zu fallen.
+  return max(0.25f - theta * 0.001f, 0.07f); 
+
+}
