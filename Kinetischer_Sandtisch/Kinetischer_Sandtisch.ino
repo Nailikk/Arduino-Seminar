@@ -77,8 +77,10 @@ void loop() {
   moveLinear(-31 * stepsPerCm, 0, motorDelayFast);
   drawSpiral(15*stepsPerCm, 15*stepsPerCm, step1Cm*0.2, 12);
 
+  autoHome();
+  moveLinear(-31 * stepsPerCm, 0, motorDelayFast);
   humidityGraph();
-  
+
   autoHome();
   
   delay(300000);  //10 Minuten = 600000 ms, 5 = 300000
