@@ -57,7 +57,9 @@ void setup() {
 
   delay(1500);  //Damit keine Bewegung beim Anschalten ausgeführt wird
 
-  test_dimensions();
+  //test_dimensions();
+
+  
 
 }
 
@@ -66,25 +68,24 @@ void loop() {
   autoHome();
   Clearboard45(); 
   
-  ReadTemperatureEveryTenMinutes();
+  TemperatureDigits();
   Serial.println("wait 5 min");
   delay(300000);  //10 Minuten = 600000 ms, 5 = 300000
 
   autoHome();
-  Clearboard();
-
-  humidityGraph();
-
-  autoHome();
+  //Clearboard();
   moveLinear(-31 * stepsPerCm, 0, motorDelayFast);
   drawSpiral(15*stepsPerCm, 15*stepsPerCm, step1Cm*0.2, 12);
 
+  humidityGraph();
+  
+  autoHome();
+  
   delay(300000);  //10 Minuten = 600000 ms, 5 = 300000
 
 }
 
 void test_dimensions() {
-
 }
 
 void autoHome(){
@@ -461,7 +462,7 @@ void moveLinearNEU(int Xdifference, int Ydifference, int motorDelayFast) {
   }
 }
 
-void ReadTemperatureEveryTenMinutes() {
+void TemperatureDigits() {
 
   sensors_event_t event;
   dht.temperature().getEvent(&event);
@@ -977,7 +978,9 @@ void humidityGraph(){
     Serial.print("Nr. ");
     Serial.println(i);
     Serial.println();
-    delay(20000); //40 Sekunden warten
+
+    delay(300000); //5 Minuten warten
+    Serial.print("5 Minuten Pause");
   }
 }
 
