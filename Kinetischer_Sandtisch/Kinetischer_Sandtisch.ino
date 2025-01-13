@@ -619,7 +619,7 @@ void drawTwo(int digit_position) {
   else if(digit_position == 2) {
     Serial.println("Nr. 2 (Einerstelle)");
     moveLinear(2.5 * stepsPerCm, -2.5 * stepsPerCm, motorDelayFast);
-    //moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
+    moveX(one_beam * stepsPerCm, HIGH, motorDelayFast);
     moveLinear(2.5 * stepsPerCm, 2.5 * stepsPerCm, motorDelayFast);
   }
   else if (digit_position == 3) {
